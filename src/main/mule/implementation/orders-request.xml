@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:twilio="http://www.mulesoft.org/schema/mule/twilio" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/twilio/current/mule-twilio.xsd">
+	<flow name="customerRegistrationImp" doc:id="9f8c4788-8260-4d58-9ab9-93fbdd061047" >
+		<ee:transform doc:name="storing customers query" doc:id="1480f8ab-e949-4ecf-a2c4-833ab56c0003" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable resource="dwl-file/customerData.dwl" variableName="customerdata" />
+				<ee:set-variable resource="dwl-file/customersselect.dwl" variableName="customersSelect" />
+				<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Sending the request to prwss-orders-sapi to fetch the customer data based on Phone Number",
+    businessObject: payload
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mile-log:request-received" doc:id="3b0cb74f-9a91-4177-a72e-3f04feb49280" name="mile-log:request-received"/>
+		<http:request method="GET" doc:name="getting the customer info" doc:id="8b247c37-d7ce-47d9-964c-419c2b8681ff" path="/coiInfo" responseTimeout="1600000" config-ref="HTTP_Request_configuration">
+			<http:headers><![CDATA[#[correlationId: attributes.headers.correlationId]]]></http:headers>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	query: vars.customersSelect,
+	values: payload.CPhone
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="logger inputPayload" doc:id="d29d8a3d-b5c0-402c-b6d4-36b5bffa3da7" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable resource="dwl-file/loggerPayload.dwl" variableName="inputPayload" />
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mile-log:success-response-sent" doc:id="f2427c3e-5c4f-4ae5-a4d8-0e76fd7ef282" name="mile-log:success-response-sent"/>
+		<choice doc:name="deciding the flow depends on payload" doc:id="99e3e6ba-0c23-4f5d-b36f-214a49389cf1" >
+			<when expression="#[sizeOf(payload)&gt;0]">
+				<ee:transform doc:name="customer already exit in DB" doc:id="90e256d9-6563-45ce-aa61-7be111670d64" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "This customer already exit in DB",
+	customerId : payload.CID[0]
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<ee:transform doc:name="logger inputPayload" doc:id="b55daac9-7547-4b3e-90c5-b4149794fba2">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "This customer already exit in DB",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:success-response-received" doc:id="b1d45447-dd67-40d9-a0a1-b9e56977466f" name="mile-log:success-response-received"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="set the payload for customer table" doc:id="cfacd610-11c3-4718-90f5-45747793e7b5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	query:"insert into mulepoc.prowess_customers (CName, CPhone, CMail) 
+values (:CName,:CPhone,:CMail);",
+	values: vars.customerdata
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Customer details are not available in the database",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:request-sent" doc:id="1ef7f324-1fca-4510-8bb2-5cd3a4b17bbd" name="mile-log:request-sent"/>
+				<http:request method="POST" doc:name="inserting the new customer details" doc:id="a4e47aa9-0c81-4d40-9b7f-2880ce4eb1c3" path="/coiUploading" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+					<http:headers ><![CDATA[#[correlationId: attributes.headers.correlationId]]]></http:headers>
+				</http:request>
+				<ee:transform doc:name="logger inputPayload" doc:id="1ceba06e-ce8b-4d18-9ab8-c610bd919719">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "customer successfully registered "
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Customer details are successfully registered into the database",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:request-received" doc:id="cfb74d15-9f54-46af-a342-ac229ce6dd1e" name="mile-log:request-received"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="orderPlacing" doc:id="838ee109-0d1b-4e47-b71f-790d4aaa1ecf" >
+		<ee:transform doc:name="storing the originalPayload from the request" doc:id="9391be21-1b3c-4a07-b3d5-870a08fb550d" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.orderDetails map{
+CID: payload.CID, 
+lineItemCount: sizeOf(payload.orderDetails filter(!isEmpty($)) distinctBy $),
+paymentMethod: $.paymentMethod, 
+itemId : $.itemId,
+totalAmount : $.unitPrice * $.quantity, 
+quantity : $.quantity,
+shippingStreet : $.Street,
+shippingCity: $.City,
+shippingState : $.State,
+shippingZipCode : $.ZipCode,
+shippingCountry : $.Country,
+orderStatus : "A",
+itemName : $.itemName
+}]]></ee:set-variable>
+				<ee:set-variable variableName="customerId" ><![CDATA["select CMail from prowess_customers where CID = :filterId;"]]></ee:set-variable>
+				<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Sending the request to prwss-orders-sapi to fetch the customer data based on Phone Number",
+    businessObject: payload
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mile-log:request-received" doc:id="4394e1dd-6bda-48ff-bf23-bc45dab941af" name="mile-log:request-received"/>
+		<http:request method="GET" doc:name="getting the tables information" doc:id="23270862-3289-4dc6-b92b-2c08fae60c2d" path="/coiInfo" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+			<http:query-params ><![CDATA[#[{
+	query: vars.customerId,
+	values: vars.originalPayload.CID[0]
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="logger inputPayload" doc:id="51053c82-70b1-4dfd-b9a6-15b185b9ed1a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Received success response from the prwss-orders-sapi",
+    businessObject: payload
+}
+]]></ee:set-variable>
+				<ee:set-variable variableName="mailId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mile-log:success-response-received" doc:id="bd68c334-7971-4fa7-9176-8d5146d463d7" name="mile-log:success-response-received"/>
+		<choice doc:name="deciding the flow depends on payload" doc:id="e57af3cd-9284-4373-9311-5b9c990fac89" >
+			<when expression="#[!isEmpty(payload)]">
+				<ee:transform doc:name="storing the ordersQuery" doc:id="e8f7666d-8df2-46c1-b4a3-421917b44958">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="ordersQuery" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+query: "insert into mulepoc.prowess_orders(CID,paymentMethod, totalAmount, shippingStreet,shippingCity,shippingState,shippingZipCode,shippingCountry)
+values( :CID,:paymentMethod, :totalAmount, :shippingStreet, :shippingCity, :shippingState, :shippingZipCode, :shippingCountry)",
+values: vars.originalPayload[0]
+}]]></ee:set-variable>
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "sending request prwss-orders-papi to inserting the orders details",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:request-sent" doc:id="a9b4ee5f-58ab-4a17-a7d0-2f6ab42385f7" name="mile-log:request-sent"/>
+				<http:request method="POST" doc:name="inserting the orders details" doc:id="944fb76f-d3ea-4f22-8adc-9c435c6dd827" path="/coiUploading" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+					<http:body ><![CDATA[#[vars.ordersQuery]]]></http:body>
+					<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+				</http:request>
+				<ee:transform doc:name="logger inputPayload" doc:id="6085e128-976b-4e6f-8052-0cab2705d181">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "successfully received the response from prwss-orders-papi and fetching the customerId fom database",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:request-received" doc:id="0948876a-563d-488f-a556-6af49b197362" name="mile-log:request-received"/>
+				<ee:transform doc:name="storing the ordersInfoQuery" doc:id="d8115391-f4d3-4dcc-a74f-bc2d23bcc909" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="ordersInfoQuery" ><![CDATA["select  orderId from mulepoc.prowess_orders where CID = :filterId order By orderCreatedOn desc limit 1"]]></ee:set-variable>
+						<ee:set-variable variableName="customerId" ><![CDATA[vars.originalPayload[0].CID]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<http:request method="GET" doc:name="getting the customerId details" doc:id="151797df-1fc3-4dcc-8d5e-c46581a830ce" path="/coiInfo" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+					<http:body ><![CDATA[#[vars.originalPayload]]]></http:body>
+					<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+					<http:query-params ><![CDATA[#[{
+	query: vars.ordersInfoQuery,
+	values: vars.customerId
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="logger inputPayload" doc:id="0ddea3f1-49b4-4c6a-9b0c-6a3ab3716a5c">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "successfully received the response and bulk inserting item details into the database",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:request-received" doc:id="c1ae0074-8423-424c-b0a9-0de887cb318f" name="mile-log:request-received"/>
+				<ee:transform doc:name="storing the itemsQuery and ordersResponse" doc:id="1afb8529-eadc-4e1a-a682-7386e56ac093" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="ordersResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.originalPayload map{
+    itemId : $.itemId,
+    CID : $.CID,
+    orderId : payload.orderId[0],
+    itemName : $.itemName,
+    lineItemStatus : "A",
+    quantity : $.quantity,
+    unitPrice : $.totalAmount
+}]]></ee:set-variable>
+						<ee:set-variable variableName="itemsquery" ><![CDATA[%dw 2.0
+output application/json
+---
+query: "insert into mulepoc.prowess_items (itemId, orderId, CID, itemName, quantity,unitPrice)
+values (:itemId,:orderId,:CID,:itemName,:quantity,:unitPrice);"]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<http:request method="POST" doc:name="inserting the items info" doc:id="ebf80640-c251-4636-9b77-2e89060deb2b" path="/itemsuploading" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+					<http:body ><![CDATA[#[{
+	payload: vars.ordersResponse,
+	query: vars.itemsQuery.query
+}]]]></http:body>
+					<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+				</http:request>
+				<ee:transform doc:name="logger inputPayload" doc:id="a33468aa-da8f-4621-a022-bd6cd5343eb9">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "successfully inserted the items into the database",
+    businessObject: payload
+}
+]]></ee:set-variable>
+						<ee:set-variable variableName="tableInfo" ><![CDATA[%dw 2.0
+output application/xml writeDeclaration=false
+---
+{
+    table @(style: "width: 50%; border: 1px solid grey; font-family: Monospace" ): {
+        tr @(bgcolor: "#6c7ae0",style: "color: white !important; font-size:14px; "): {
+			th @() : "orderId",
+			th @() : "itemId",
+            th @() : "itemName",
+            th @() : "total"
+        },
+        (vars.ordersResponse map(item,index)->{ tr @(align:"center", style: "color: #154360; font-size:12px; font-weight: 500; width:10%"): 
+            {
+                td @(): item.orderId,
+                td @(): item.itemId,
+				td @(): item.itemName,
+                td @(): item.quantity * item.unitPrice
+            }
+        })
+    }
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:request-received" doc:id="87c8d1ea-c28b-41f3-b79f-ef542b470c1a" name="mile-log:request-received"/>
+				<ee:transform doc:name="success Response" doc:id="3dbbeecb-8e0e-42e9-8b34-4596d0bc6d1b" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="alertMessage" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"statusCode" : 201,
+	"status" : "order placed successfully",
+	"orderId" : vars.ordersResponse.orderId[0],
+	"customerId" : vars.originalPayload.CID[0]
+}]]></ee:set-variable>
+						<ee:set-variable variableName="fromMail" ><![CDATA[%dw 2.0
+output application/java
+---
+"vaishudev0@gmail.com"]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<parse-template doc:name="Parse Template" doc:id="258e9b06-6088-45b6-9115-d4b70df75888" >
+					<content >&lt;html&gt;
+  &lt;head&gt;
+   &lt;/head&gt;
+  &lt;body&gt;
+
+ 
+
+    &lt;p&gt;Dear Customer,&lt;/p&gt;
+    &lt;p&gt;Your order has been placed successfully.&lt;/p&gt;
+    &lt;p&gt;Thank you for shopping with us! Please feel free to contact admin if you have any queries about your order.&lt;/p&gt;
+    &lt;p&gt; &lt;h2&gt;Your Order Details are:&lt;/h2&gt;&lt;br/&gt;
+        Order ID: #[vars.ordersResponse.orderId[0]]&lt;br/&gt;
+        item Name: #[vars.ordersResponse.itemName]&lt;br/&gt;
+        payment Mode: #[vars.originalPayload.paymentMethod]&lt;br/&gt;
+        Amount to be paid: #[vars.originalPayload.totalAmount]  &lt;br/&gt;
+    &lt;br/&gt;
+    &lt;style&gt;
+  &lt;h2&gt;Items you have purchased&lt;/h2&gt;
+    &lt;/style&gt;
+  #[vars.tableInfo]
+&lt;br /&gt;&lt;br /&gt;
+&lt;p&gt;This is an automated mail, please do not reply.&lt;/p&gt;
+&lt;p&gt;Thanks and Regards,&lt;/p&gt;
+&lt;p&gt;XYZ service ltd&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</content>
+				</parse-template>
+				<email:send doc:name="email notification" doc:id="8ddfef4d-8655-40c9-9e51-1ca1518c1312" config-ref="mail_notification" subject="Placed Order Succeessfully" fromAddress="#[vars.fromMail]">
+					<email:to-addresses >
+						<email:to-address value="#[vars.mailId.CMail[0]]" />
+					</email:to-addresses>
+					<email:body contentType="text/html">
+					</email:body>
+				</email:send>
+				<ee:transform doc:name="mail response" doc:id="9ab09ce5-5d22-48cc-920e-9a66fecba44a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.alertMessage]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="twloMsg" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.ordersResponse map {
+	 message: "Dear Customer, thanks for placing your order with us. Your package is being processed and will be on its way soon. You can track your order Id" ++
+"orderId" ++ ":" ++ $.orderId 
+}distinctBy $]]></ee:set-variable>
+					</ee:variables>
+				
+</ee:transform>
+				<twilio:create20100401-accounts-messagesjson-by-account-sid doc:name="message notification" doc:id="69bc86df-199f-4078-8ca9-ce77b1d1b665" config-ref="Twilio_Connector_Config" accountSid="${twilio.user}">
+					<twilio:accounts-messages-content ><![CDATA[#[%dw 2.0
+output application/x-www-form-urlencoded
+---
+{
+	From : "+12513571181",
+	To : "+917097760977",
+	Body: vars.twloMsg.message
+}]]]></twilio:accounts-messages-content>
+				</twilio:create20100401-accounts-messagesjson-by-account-sid>
+				<ee:transform doc:name="logger inputPayload" doc:id="abc349a4-e12b-432f-9dda-1b8a781978eb" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: app.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "successfully send order notification to registered users",
+    businessObject: payload
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:success-response-sent" doc:id="0a0cc4bc-402d-4c92-81bc-b3af48705eca" name="mile-log:success-response-sent"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Customer is not registered" doc:id="fa1c2e0e-9230-43df-9340-e756ea424904" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Customer is not registered",
+    businessObject: payload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:success-response-received" doc:id="e26b6e83-3f52-49a5-a1de-4d2a148001aa" name="mile-log:success-response-received"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="orderDetails" doc:id="66cd3986-63eb-47e7-8e93-e5cfe82272f5" >
+		<ee:transform doc:name="storing the ordersQuery and Id" doc:id="ef27ce11-bb9b-4ffc-8ca7-3b649b17fc17" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customerOrders" ><![CDATA["select po.CID as poCID,po.orderId,po.paymentMethod,po.orderCreatedOn,po.totalAmount,po.shippingCity,po.shippingCountry,po.shippingState,po.shippingStreet,po.shippingZipCode,pi.itemId,pi.itemName,pi.quantity,pi.unitPrice,pi.CID,pc.CID as pcCID,pc.CName from mulepoc.prowess_items pi, mulepoc.prowess_orders po,mulepoc.prowess_customers pc  where po.CID = :filterId and pi.CID = :filterId and pc.CID= :filterId;"]]></ee:set-variable>
+				<ee:set-variable variableName="orderId" ><![CDATA[%dw 2.0
+output application/java
+---
+if(attributes.queryParams[0] != null) attributes.queryParams[0] else payload.orderId]]></ee:set-variable>
+				<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Sending the request to prwss-orders-sapi to fetch the orderId data from the database",
+    businessObject: payload
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mile-log:request-received" doc:id="54d602d0-f918-43dd-b3df-4a642f2ea5ca" name="mile-log:request-received"/>
+		<http:request method="GET" doc:name="getting the ordersId info" doc:id="0ce586cd-52fc-4299-92a6-aac8e5d9069b" path="/coiInfo" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+			<http:query-params ><![CDATA[#[{
+	query: vars.customerOrders,
+	values: vars.orderId
+}]]]></http:query-params>
+		</http:request>
+		<choice doc:name="deciding the flow depends on payload" doc:id="a3dfb829-4830-4654-83f7-c4d8ae32562f" >
+			<when expression="#[!isEmpty(payload)]">
+				<ee:transform doc:name="orderId infomation" doc:id="8cc72b91-3e59-4020-9f91-50756a10f2fb">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map $ groupBy $.orderId mapObject {
+    orderId: $.orderId[0],
+    orderData: $.orderCreatedOn[0],
+    items: $ map {
+        itemName: $.itemName,
+        itemId: $.itemId,
+        quantity: $.quantity,
+        unitPrice: $.unitPrice
+    },
+    shippingAddress: $ map {
+        shippingStreet: $.shippingStreet,
+        shippingCity: $.shippingCity,
+        shippingState: $.shippingState,
+        shippingCountry: $.shippingCountry,
+        shippingZipCode: $.shippingZipCode
+    } distinctBy $,
+    paymentMethod: $.paymentMethod[0],
+    totalAmount: $.totalAmount[0]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<ee:transform doc:name="logger inputPayload" doc:id="e4de6fec-5ad2-4f92-a5b5-cf7c5b2a3fbb">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "Received orderId information",
+    businessObject: payload
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:success-response-received" doc:id="c2a5b2e2-ce8b-4990-b738-d9d6f2f94c5c" name="mile-log:success-response-received"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="orderId is not valid" doc:id="2f435f81-c243-4400-9b66-98b3254f9f26" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    correlationId : vars.correlationId,
+    businessProcessName: flow.name,
+    flowName: flow.name,  
+    source: Mule::p('application.name'),
+    target: Mule::p('application.target'),
+    httpMethod: attributes.method,
+    message: "orderId is not valid",
+    businessObject: payload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="mile-log:failure-response-received" doc:id="23151c2d-1586-4d21-9ef4-2446a1749dd1" name="mile-log:failure-response-received"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

@@ -1,0 +1,1 @@
+"select CID from mulepoc.prowess_customers where CPhone = :filterId;"

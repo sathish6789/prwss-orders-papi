@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="global-error-handlingError_Handler" doc:id="62e7e836-c53e-42b5-bc34-6141cc77debf" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="98a130bb-90c0-4608-944a-ec9eb46f947a" type="EMAIL:ACCESSING_FOLDER, EMAIL:CONNECTIVITY, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
+			<ee:transform doc:name="email error details" doc:id="5bdc8ee3-19a9-4205-a50f-e3650aa4592c" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(error.errorMessage.payload) and !isEmpty(error.errorMessage.payload.errorOrigin)) 
+	error.errorMessage.payload
+else { 
+  "errorOrigin": p('application.name'),
+  "status" : "ERROR",
+  "code" : error.errorType.identifier default "500",
+  "message" :  error.description,
+  "description" : error.detailedDescription,
+  "correlationId" : vars.correlationId default "",
+  "timestamp": now() as DateTime
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="calling errorhandlingexit" doc:id="08b43f2d-7997-4b94-858e-2f401293132a" name="errorhandlingexit"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5ab6ffc9-22d3-4222-a4cb-bcf4cab12af9" type="ANYPOINT-MQ:CONNECTIVITY, ANYPOINT-MQ:DESTINATION_NOT_FOUND, ANYPOINT-MQ:ILLEGAL_BODY, ANYPOINT-MQ:PUBLISHING, ANYPOINT-MQ:RETRY_EXHAUSTED, EXPRESSION">
+			<ee:transform doc:name="anypoint mq error details" doc:id="5dffd1ea-82da-4d11-96bc-188a14587ee7" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(error.errorMessage.payload) and !isEmpty(error.errorMessage.payload.errorOrigin)) 
+	error.errorMessage.payload
+else { 
+  "errorOrigin": p('application.name'),
+  "status" : "ERROR",
+  "code" : error.errorType.identifier default "500",
+  "message" :  error.description,
+  "description" : error.detailedDescription,
+  "correlationId" : vars.correlationId default "",
+  "timestamp": now() as DateTime
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="calling errorhandlingexit" doc:id="f773590a-6b9f-4a03-9dc2-cabd7a04a91b" name="errorhandlingexit" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="20014a16-0227-4179-827a-175afd8619db" type="HTTP:BAD_GATEWAY, HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:CONNECTIVITY, HTTP:FORBIDDEN, HTTP:INTERNAL_SERVER_ERROR, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:RETRY_EXHAUSTED, HTTP:SECURITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE, EXPRESSION">
+			<ee:transform doc:name="http error details" doc:id="3f40b8cc-f981-4d9c-b006-9e5156d8505a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(error.errorMessage.payload) and !isEmpty(error.errorMessage.payload.errorOrigin)) 
+	error.errorMessage.payload
+else { 
+  "errorOrigin": p('application.name'),
+  "status" : "ERROR",
+  "code" : error.errorType.identifier default "500",
+  "message" :  error.description,
+  "description" : error.detailedDescription,
+  "correlationId" : vars.correlationId default "",
+  "timestamp": now() as DateTime
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="calling errorhandlingexit" doc:id="9d589082-3d00-42de-ac2a-022c35f4631f" name="errorhandlingexit" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="74521929-2eb5-42f8-9886-7b78cbd712d7" type="APIKIT:BAD_REQUEST, APIKIT:METHOD_NOT_ALLOWED, APIKIT:NOT_ACCEPTABLE, APIKIT:NOT_FOUND, APIKIT:UNSUPPORTED_MEDIA_TYPE, EXPRESSION">
+			<ee:transform doc:name="apikit errors details" doc:id="735f1734-290f-4321-b710-1fa308024153" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(error.errorMessage.payload) and !isEmpty(error.errorMessage.payload.errorOrigin)) 
+	error.errorMessage.payload
+else { 
+  "errorOrigin": p('application.name'),
+  "status" : "ERROR",
+  "code" : error.errorType.identifier default "500",
+  "message" :  error.description,
+  "description" : error.detailedDescription,
+  "correlationId" : vars.correlationId default "",
+  "timestamp": now() as DateTime
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="calling errorhandlingexit" doc:id="786b7ec7-a2df-4183-9be1-4e53e99b15a8" name="errorhandlingexit" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9134a60c-fa07-4c6e-81d0-f4c109804aad" type="ANY">
+			<ee:transform doc:name="any error details" doc:id="96ec4eec-b811-4aa3-8de0-51c4f26e181f" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(!isEmpty(error.errorMessage.payload) and !isEmpty(error.errorMessage.payload.errorOrigin)) 
+	error.errorMessage.payload
+else { 
+  "errorOrigin": p('application.name'),
+  "status" : "ERROR",
+  "code" : error.errorType.identifier default "500",
+  "message" :  error.description,
+  "description" : error.detailedDescription,
+  "correlationId" : vars.correlationId default "",
+  "timestamp": now() as DateTime
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="calling errorhandlingexit" doc:id="d7ac1256-6f48-429c-941c-f493af4fcd10" name="errorhandlingexit" />
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="errorhandlingexit" doc:id="47bba4d9-947c-4645-a461-14c261c9e154" >
+		<logger level="INFO" doc:name="error payload" doc:id="a75955be-b52e-48b3-ae6b-ac95abad4634" message="#[payload]"/>
+	</sub-flow>
+</mule>

@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_47bba4d9_947c_4645_a461_14c261c9e154_Input_Payload = {|
+  errorType: String | Null, 
+  errorDescription: String | Null, 
+  errorDetailedDescription: String | Null, 
+  errorTypeName: String | Null
+|}
+

@@ -1,0 +1,18 @@
+# Use this file for encrypted user/password information.
+# Unencrypted values may be used in this file using standard yaml syntax
+# Encrypted values must be enclosed in ![] within the quotes.
+
+#TLS context configuration
+  
+anypoint:
+  appid: "![uFX7YvXXHEjuDN6Tvrb7fDTJFDf1vPXyqz5DPO6y7sWln5Q0C1MBGw==]"
+  clientsecret: "![sIGmVxic+PkCLshI2vrRATaRIgftH66Int0cMiJ20aSWIkWfYKZG/A==]"
+
+twilio:
+  password: "![ml/XIPEOnOPJMOMgBzLx5e+MdTlTTAf2YDWtZSdfShoED++O2q3A0A==]"
+  
+email:
+  pwd: "![hCjsCBUYfCg0SvC17dcVimMBMS88gKtm]"
+  
+newmail:
+  passwrd: "![jnlmt8qCq9H9oM6xscvYxD9WZJqYLEES]"

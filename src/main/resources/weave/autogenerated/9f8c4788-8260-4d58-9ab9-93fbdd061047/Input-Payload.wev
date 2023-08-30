@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_9f8c4788_8260_4d58_9ab9_93fbdd061047_Input_Payload = {
+  CStatus: String, 
+  CPhone: Number, 
+  CName: String, 
+  CMail: String, 
+  _?: Any
+}
+

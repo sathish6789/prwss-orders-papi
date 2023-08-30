@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:twilio="http://www.mulesoft.org/schema/mule/twilio"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:cofww-logger="http://www.mulesoft.org/schema/mule/cofww-logger"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/cofww-logger http://www.mulesoft.org/schema/mule/cofww-logger/current/mule-cofww-logger.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/twilio/current/mule-twilio.xsd">
+
+	<!-- This configuration uses default algorithm (AES) and mode (CBC) -->
+<apikit:config name="prwss-orders-papi-config" api="prwss-orders-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<secure-properties:config
+		name="Secure_Properties_Config"
+		doc:name="Environment-specific Secure Properties Config"
+		doc:id="b64daa35-1683-43f6-84c9-21776df3753a"
+		file="config/config-secured-${mule.env}.yaml"
+		key="${mule.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+
+	<configuration-properties
+		doc:name="Application Configuration properties"
+		doc:id="4e9071c0-5800-46f3-8031-b1ae639c2256"
+		file="config/config-${mule.env}.yaml" />
+
+	<configuration-properties
+		doc:name="Common Configuration properties"
+		doc:id="8f0a30ee-8023-4aa2-91a3-c8ab1f805c27"
+		file="config/config-common.yaml" />
+
+	<global-property doc:name="default mule.env"
+		doc:id="fe3c60da-e4a7-4f63-b47b-6f30a7b8bc93" name="mule.env"
+		value="dev" />
+
+	<global-property doc:name="default mule.encryption.key"
+		doc:id="562465a7-8482-41fb-ad41-be913eca44c9"
+		name="mule.key" value="123456789mulesof" />
+
+<!-- 	<api-gateway:autodiscovery apiId="${api.id}"
+		doc:name="API Autodiscovery"
+		doc:id="99fac178-73f2-484b-8821-be13d2c2201a" flowRef="template-main"
+		ignoreBasePath="true" /> -->
+
+	<http:listener-config name="http-listener-config">
+        <http:listener-connection host="${http.host}" port="${http.port}"/>
+    </http:listener-config>
+<import doc:name="Import" doc:id="78296f87-cec4-4423-a4a9-2d06780d26ce" file="mule-common-logging.xml" />
+<import doc:name="Import" doc:id="c0101f29-5c34-41ae-9c25-331d1bebe2f4" file="common-global.xml" />
+<import doc:name="Import" doc:id="3f99b3e3-8e18-443c-bfc3-41fa8ecf9124" file="error-handler.xml" />
+	<anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="02b3575e-fa87-4ff0-9e64-c8818c5f2c60" >
+		<anypoint-mq:connection url="${anypoint.url}" clientId="${secure::anypoint.appid}" clientSecret="${secure::anypoint.clientsecret}"/>
+	</anypoint-mq:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c63df89a-58fb-4d4b-84c7-b5ee19368c92" basePath="/api" >
+		<http:request-connection host="${httpRequest.host}" port="${httpRequest.port}" />
+	</http:request-config>
+	<twilio:config name="Twilio_Connector_Config" doc:name="Twilio Connector Config" doc:id="aac69c50-57ad-4a34-8b0f-9b7cdad79843" >
+		<twilio:account-sid-auth-token-connection username="${twilio.user}" password="${secure::twilio.password}" baseUri="${twilio.url}"/>
+	</twilio:config>
+	<email:imap-config name="New_Email_listener" doc:name="Email IMAP" doc:id="d49719cd-6c00-4db1-8521-76182db42700" >
+		<email:imaps-connection user="${emailListner.user}" password="${secure::newmail.passwrd}" host="${emailListner.host}" port="${emailListner.port}">
+			<tls:context >
+				<tls:trust-store insecure="true" />
+			</tls:context>
+		</email:imaps-connection>
+	</email:imap-config>
+	<email:smtp-config name="mail_notification" doc:name="Email SMTP" doc:id="73f7b4f0-5863-4b44-8303-c57fe2b93f4b" >
+		<email:smtp-connection host="${mailsend.host}" port="${mailsend.port}" user="${mailsend.user}" password="${secure::email.pwd}">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+
+</mule>

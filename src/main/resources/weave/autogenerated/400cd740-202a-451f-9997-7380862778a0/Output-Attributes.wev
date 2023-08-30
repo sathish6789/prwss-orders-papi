@@ -1,0 +1,23 @@
+%dw 2.0
+
+type auto_400cd740_202a_451f_9997_7380862778a0_Output_Attributes = {|
+  remoteAddress*: String, 
+  localAddress*: String, 
+  clientCertificate*?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  uriParams*: {|  |}, 
+  queryParams*: {|  |}, 
+  requestPath*: String, 
+  relativePath*: String, 
+  scheme*: String, 
+  version*: String, 
+  method*: String, 
+  requestUri*: String, 
+  queryString*: String, 
+  headers*: {|  |}, 
+  listenerPath*: String
+|}
+

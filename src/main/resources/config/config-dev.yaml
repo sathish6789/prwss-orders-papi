@@ -1,0 +1,33 @@
+api:
+  autodiscoveryId: "123456"  
+
+http:
+  host: "0.0.0.0"
+  port: "8083"
+  
+https:
+  host: "0.0.0.0"
+  port: "8084"
+  
+anypoint:
+  url: "https://mq-us-east-1.anypoint.mulesoft.com/api/v1/organizations/781344dd-5c35-44e2-a7d5-54084ffee180/environments/cc8e93a9-ae9d-4d28-ba91-d3a789a907a4"
+
+emailListner:
+  host: "imap.gmail.com"
+  port: "993"
+  user: "vaishudev0@gmail.com"
+
+mailsend:
+  host: "smtp.gmail.com"
+  port: "587"
+  user: "vaishudev0@gmail.com"
+  to: "vijaykumarvjk646@gmail.com"
+
+twilio:
+  user: "ACd1b551b464ae9120579fee8fa1fb47c4"
+  url: "https://api.twilio.com"
+
+httpRequest:
+  host: "0.0.0.0"
+  port: "8085"
+

@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_be353f78_a7a1_4101_a963_b59aa4a5023d_Input_Payload = {|
+  apiName: String, 
+  status: String, 
+  dependencies: Array<{|    name: String,     status: String  |}>
+|}
+
