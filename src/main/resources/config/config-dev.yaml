@@ -1,5 +1,10 @@
 api:
-  autodiscoveryId: "123456"  
+  id: "18949461"
+
+tls:
+  type: "JKS"
+  path: "KeyStore.jks"
+  alias: "mulesoft"
 
 http:
   host: "0.0.0.0"
@@ -7,7 +12,8 @@ http:
   
 https:
   host: "0.0.0.0"
-  port: "8084"
+  port: "8082"
+  path: "/api/*"
   
 anypoint:
   url: "https://mq-us-east-1.anypoint.mulesoft.com/api/v1/organizations/781344dd-5c35-44e2-a7d5-54084ffee180/environments/cc8e93a9-ae9d-4d28-ba91-d3a789a907a4"
@@ -28,6 +34,17 @@ twilio:
   url: "https://api.twilio.com"
 
 httpRequest:
-  host: "0.0.0.0"
-  port: "8085"
+  host: "prwss-orders-sapi.us-e2.cloudhub.io"
+  port: "443"
 
+coinfo:
+  path: "/coi-info"
+  
+customerdata:
+  path: "/coi-upload"
+
+itemsdata:
+  path: "/items-upload"
+  
+health:
+  path: "/health"

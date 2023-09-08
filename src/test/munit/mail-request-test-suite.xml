@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="mail-request-test-suite.xml" />
+	<munit:test name="mail-request-test-suite-mail-requestFlowTest" doc:id="5a57cdfc-f148-4667-803f-21bc4e558c4d" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="8eea427c-abfc-46b9-adff-dc342fdeb83a" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8b247c37-d7ce-47d9-964c-419c2b8681ff" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="05229705-340a-4b14-ae36-4fab7c96c9a7" >
+				<munit:payload value="#[output application/json&#10;---&#10;readUrl('classpath://mqdata.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to mail-requestFlow" doc:id="1dbc571d-e59f-4d9d-96cc-bfa344a56cd0" name="mail-requestFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="988c7592-f122-4867-8e17-fb73088f10bc" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

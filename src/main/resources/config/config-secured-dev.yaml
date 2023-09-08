@@ -7,6 +7,8 @@
 anypoint:
   appid: "![uFX7YvXXHEjuDN6Tvrb7fDTJFDf1vPXyqz5DPO6y7sWln5Q0C1MBGw==]"
   clientsecret: "![sIGmVxic+PkCLshI2vrRATaRIgftH66Int0cMiJ20aSWIkWfYKZG/A==]"
+  clientid: "![G0cejP00rxVWg6+tmZuBHh6PR73QljB16T1nuZxJAyzNSk+X0ZVdOA==]"
+  clientsecrt: "![7Kt1zzL3gDVHtIQWxZoQ6nlmfZGYimnlrbkmXsbVd0wXKHcrE8gPRw==]"
 
 twilio:
   password: "![ml/XIPEOnOPJMOMgBzLx5e+MdTlTTAf2YDWtZSdfShoED++O2q3A0A==]"
@@ -16,3 +18,7 @@ email:
   
 newmail:
   passwrd: "![jnlmt8qCq9H9oM6xscvYxD9WZJqYLEES]"
+  
+tls:
+  pssword: "![zkbX9B/Wjv2zopfd5KbJyw==]"
+

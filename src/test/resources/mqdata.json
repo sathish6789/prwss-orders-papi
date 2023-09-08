@@ -1,0 +1,42 @@
+[
+  {
+    "CName": "sanay",
+    "CPhone": 7097766977,
+    "CMail": "sathish111@gmail.com",
+    "CStatus": "Active"
+  },
+  {
+    "CID": 2,
+    "orderDetails": [
+      {
+        "itemId": "AB10001",
+        "itemName": "pepsi",
+        "lineItemStatus": "A",
+        "quantity": 10,
+        "paymentMethod": "online",
+        "unitPrice": 10,
+        "Street": "kphp",
+        "City": "kphp",
+        "State": "TS",
+        "ZipCode": 500072,
+        "Country": "IN"
+      },
+      {
+        "itemId": "AB110011",
+        "itemName": "oppo",
+        "lineItemStatus": "A",
+        "quantity": 1,
+        "paymentMethod": "online",
+        "unitPrice": 1000,
+        "Street": "kphp",
+        "City": "kphp",
+        "State": "TS",
+        "ZipCode": 500072,
+        "Country": "IN"
+      }
+    ]
+  },
+  {
+    "orderId": 2
+  }
+]

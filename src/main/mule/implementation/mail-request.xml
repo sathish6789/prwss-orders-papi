@@ -70,7 +70,12 @@ message]]></ee:set-payload>
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload[0]]]></ee:set-payload>
+{
+    "CName": payload.CName[0],
+    "CPhone": payload.CPhone[0],
+    "CMail": payload.CMail[0],
+    "CStatus": payload.CStatus[0]
+}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 				<flow-ref doc:name="calling customerRegistrationImp flow" doc:id="2c932a78-dddf-4c2d-a94c-8d9d9366ff45" name="customerRegistrationImp"/>
@@ -81,7 +86,10 @@ payload[0]]]></ee:set-payload>
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload[1]]]></ee:set-payload>
+{
+    CID: payload.CID[0],
+    orderDetails: payload.orderDetails[0]
+}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 				<flow-ref doc:name="calling orderPlacing flow" doc:id="3ad93b4d-4475-4f2d-b624-03bde666dee4" name="orderPlacing"/>
@@ -92,7 +100,9 @@ payload[1]]]></ee:set-payload>
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload[2]]]></ee:set-payload>
+{
+    orderId: payload.orderId[0]
+}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 				<flow-ref doc:name="calling orderDetails flow" doc:id="b35eb645-7b67-4737-9817-f1e046ebe73e" name="orderDetails"/>
@@ -123,5 +133,7 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="mile-log:failure-response-received" doc:id="5a514612-b5cd-4475-b6ca-96263c969a59" name="mile-log:failure-response-received"/>
+		<error-handler ref="error-handler" />
 	</flow>
+	<sub-flow name="mail-requestSub_Flow" doc:id="adb0b3f5-cd63-42bf-ac54-cf06023649ae" />
 </mule>

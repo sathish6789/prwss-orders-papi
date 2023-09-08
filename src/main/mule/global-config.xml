@@ -41,30 +41,21 @@ http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/t
 		doc:id="8f0a30ee-8023-4aa2-91a3-c8ab1f805c27"
 		file="config/config-common.yaml" />
 
-	<global-property doc:name="default mule.env"
-		doc:id="fe3c60da-e4a7-4f63-b47b-6f30a7b8bc93" name="mule.env"
-		value="dev" />
-
-	<global-property doc:name="default mule.encryption.key"
-		doc:id="562465a7-8482-41fb-ad41-be913eca44c9"
-		name="mule.key" value="123456789mulesof" />
-
-<!-- 	<api-gateway:autodiscovery apiId="${api.id}"
+    <api-gateway:autodiscovery apiId="${api.id}"
 		doc:name="API Autodiscovery"
-		doc:id="99fac178-73f2-484b-8821-be13d2c2201a" flowRef="template-main"
-		ignoreBasePath="true" /> -->
+		doc:id="99fac178-73f2-484b-8821-be13d2c2201a" flowRef="prwss-orders-papi-main"
+		ignoreBasePath="true" />
 
 	<http:listener-config name="http-listener-config">
-        <http:listener-connection host="${http.host}" port="${http.port}"/>
+        <http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS" tlsContext="TLS_Context"/>
     </http:listener-config>
 <import doc:name="Import" doc:id="78296f87-cec4-4423-a4a9-2d06780d26ce" file="mule-common-logging.xml" />
 <import doc:name="Import" doc:id="c0101f29-5c34-41ae-9c25-331d1bebe2f4" file="common-global.xml" />
-<import doc:name="Import" doc:id="3f99b3e3-8e18-443c-bfc3-41fa8ecf9124" file="error-handler.xml" />
 	<anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="02b3575e-fa87-4ff0-9e64-c8818c5f2c60" >
 		<anypoint-mq:connection url="${anypoint.url}" clientId="${secure::anypoint.appid}" clientSecret="${secure::anypoint.clientsecret}"/>
 	</anypoint-mq:config>
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c63df89a-58fb-4d4b-84c7-b5ee19368c92" basePath="/api" >
-		<http:request-connection host="${httpRequest.host}" port="${httpRequest.port}" />
+		<http:request-connection host="${httpRequest.host}" port="${httpRequest.port}" protocol="HTTPS"/>
 	</http:request-config>
 	<twilio:config name="Twilio_Connector_Config" doc:name="Twilio Connector Config" doc:id="aac69c50-57ad-4a34-8b0f-9b7cdad79843" >
 		<twilio:account-sid-auth-token-connection username="${twilio.user}" password="${secure::twilio.password}" baseUri="${twilio.url}"/>
@@ -83,5 +74,8 @@ http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/t
 			</email:properties>
 		</email:smtp-connection>
 	</email:smtp-config>
+	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="460fb519-5530-4ede-880c-621e158494a0" >
+		<tls:key-store type="jks" path="${tls.path}" alias="${tls.alias}" keyPassword="${secure::tls.pssword}" password="${secure::tls.pssword}" />
+	</tls:context>
 
 </mule>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
-    <flow name="prwss-orders-papi-main">
-        <http:listener config-ref="http-listener-config" path="/api/*">
+    <flow name="prwss-orders-papi-main" doc:id="e08bfdc0-dcab-4afa-8e33-42405d0bb627">
+        <http:listener config-ref="http-listener-config" path="${https.path}">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <ee:transform doc:name="set the correlationId" doc:id="473e4c9b-1595-4d8b-99b6-d1936c4eef1c">
@@ -17,7 +17,7 @@
             </ee:variables>
         </ee:transform>
         <apikit:router config-ref="prwss-orders-papi-config" />
-        <error-handler ref="global-error-handlingError_Handler" />
+        <error-handler ref="error-handler" />
     </flow>
     <flow name="prwss-orders-papi-console">
         <http:listener config-ref="http-listener-config" path="/console/*">
@@ -30,9 +30,9 @@
             </http:error-response>
         </http:listener>
         <apikit:console config-ref="prwss-orders-papi-config" />
-        <error-handler ref="global-error-handlingError_Handler" />
+        <error-handler ref="error-handler" />
     </flow>
-    <flow name="post:\customerRegistration:application\json:prwss-orders-papi-config">
+    <flow name="post:\customer-registration:application\json:prwss-orders-papi-config">
         <ee:transform doc:name="logger inputPayload">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -57,10 +57,9 @@ output application/json
             </ee:variables>
         </ee:transform>
         <flow-ref doc:name="mile-log:request-sent" doc:id="1dd9f967-4b5e-46a1-8ec8-6b7f8e6a0004" name="mile-log:request-sent" />
-        <flow-ref doc:name="calling customerRegistrationImp flow" doc:id="3aa197e4-ffcb-48bf-86d5-ad8f9b782522" name="customerRegistrationImp" />
-        <error-handler ref="global-error-handlingError_Handler" />
+        <flow-ref doc:name="calling customerRegistration flow" doc:id="3aa197e4-ffcb-48bf-86d5-ad8f9b782522" name="customerRegistrationImp" />
     </flow>
-    <flow name="post:\placingOrder:application\json:prwss-orders-papi-config">
+    <flow name="post:\placing-order:application\json:prwss-orders-papi-config">
         <ee:transform doc:name="logger inputPayload" doc:id="01f7d890-ceee-4535-8e65-113ff95182ad">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -86,9 +85,8 @@ output application/json
         </ee:transform>
         <flow-ref doc:name="mile-log:request-sent" doc:id="a19a7016-eeb0-418e-a50b-2bd912c62864" name="mile-log:request-sent" />
         <flow-ref doc:name="calling orderPlacing flow" doc:id="f027603f-cc2e-4695-8303-d03727ef395b" name="orderPlacing" />
-        <error-handler ref="global-error-handlingError_Handler" />
     </flow>
-    <flow name="get:\orderDetails:prwss-orders-papi-config">
+    <flow name="get:\order-details:prwss-orders-papi-config">
         <ee:transform doc:name="logger inputPayload">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -114,10 +112,8 @@ output application/json
         </ee:transform>
         <flow-ref doc:name="mile-log:request-sent" doc:id="b985af8b-b20d-4f9d-a0fa-d8aaab7d07b1" name="mile-log:request-sent" />
         <flow-ref doc:name="calling orderDetails flow" doc:id="f6de6753-e019-4db6-b41c-d8ec60df96d9" name="orderDetails" />
-        <error-handler ref="global-error-handlingError_Handler" />
     </flow>
     <flow name="get:\health:prwss-orders-papi-config">
-        <flow-ref doc:name="Flow Reference" doc:id="c38ad118-77e8-46b2-bfc9-3167860b6785" name="healthcheckFlow" />
-        <error-handler ref="global-error-handlingError_Handler" />
+        <flow-ref doc:name="healthcheck" doc:id="c38ad118-77e8-46b2-bfc9-3167860b6785" name="healthcheckFlow" />
     </flow>
 </mule>

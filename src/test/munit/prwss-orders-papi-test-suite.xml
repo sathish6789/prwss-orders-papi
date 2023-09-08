@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="prwss-orders-papi-test-suite.xml" />
+	<munit:test name="prwss-orders-papi-test-suite-prwss-orders-papi-mainTest" doc:id="475fb6e4-ef66-41ba-8834-117d5581ec70" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3c47b31f-3163-4fa9-9285-aa04eff39251" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="prwss-orders-papi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to prwss-orders-papi-main" doc:id="a847ba86-da04-411e-8ff7-f67245de54f3" name="prwss-orders-papi-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a416edfc-f1e2-483a-ab75-a0689fed0c6e" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="prwss-orders-papi-test-suite-prwss-orders-papi-consoleTest" doc:id="74bdf84c-0586-4706-befb-2bc4dcfc5acd" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e9ae8ee7-9261-40ce-b88a-424f35ca5a76" processor="apikit:console">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="prwss-orders-papi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to prwss-orders-papi-console" doc:id="812c3b85-df5a-4419-8453-4e6cf66f4deb" name="prwss-orders-papi-console"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a8be9d1f-7f99-4935-a790-53b3d7bfc8a9" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="prwss-orders-papi-test-suite-post:\customer-registration:application\json:prwss-orders-papi-configTest" doc:id="aa8eae63-fbb2-4f76-938c-610f90106426" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="8f3f48b2-6ac6-479f-b566-9030e1231883" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8b247c37-d7ce-47d9-964c-419c2b8681ff" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3daf91e7-2fec-47ac-9f59-5dd7ca82e65f" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a4e47aa9-0c81-4d40-9b7f-2880ce4eb1c3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="809c2dbc-5bfe-4bec-afd4-352a12ff76d4" >
+				<munit:payload value="#[output application/json&#10;---&#10;readUrl('classpath://customerdetails.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\customer-registration:application\json:prwss-orders-papi-config" doc:id="fff2e85b-03a3-410b-bb7e-1d8ced867395" name="post:\customer-registration:application\json:prwss-orders-papi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="45d79345-409f-461a-a5b4-135cbc521405" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="prwss-orders-papi-test-suite-post:\customer-registration:application\json:prwss-orders-papi-configTest1" doc:id="8af41ad4-6b7b-43ed-b3e1-4710ef45ffb6" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="df018009-dc01-42d8-8927-92e70a583d0c" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8b247c37-d7ce-47d9-964c-419c2b8681ff" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when1" doc:id="baf03a08-a595-4f07-ab64-f4d348343700" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a4e47aa9-0c81-4d40-9b7f-2880ce4eb1c3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\customer-registration:application\json:prwss-orders-papi-config" doc:id="294fd684-5496-4769-88f9-ed2633b53f42" name="post:\customer-registration:application\json:prwss-orders-papi-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="360806a3-f823-4c88-a6ac-a7e247404d98" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="prwss-orders-papi-test-suite-post:\placing-order:application\json:prwss-orders-papi-configTest" doc:id="de83be13-6b5d-4700-af5a-9f865f0ec35d" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ebf7af4e-c14a-430f-a316-175425ed6861" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="23270862-3289-4dc6-b92b-2c08fae60c2d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="76f05732-de1b-4209-a91a-c2e45363a321" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="944fb76f-d3ea-4f22-8adc-9c435c6dd827" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f7a7a908-9746-409c-ae61-f18246b7fc8a" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="151797df-1fc3-4dcc-8d5e-c46581a830ce" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="281818cf-0078-4ee9-95f4-be95236571f5" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ebf80640-c251-4636-9b77-2e89060deb2b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="621eb3f8-bf39-45e9-8b70-57cf7b053672" processor="email:send">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8ddfef4d-8655-40c9-9e51-1ca1518c1312" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="a2ffb69e-3a42-4f01-b9cd-0b76daa3a064" processor="twilio:create20100401-accounts-messagesjson-by-account-sid">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="69bc86df-199f-4078-8ca9-ce77b1d1b665" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="fb933d29-11fc-4376-ae34-b86e363e4ced" >
+				<munit:payload value="#[output application/json&#10;---&#10;readUrl('classpath://orderdata.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\placing-order:application\json:prwss-orders-papi-config" doc:id="97618275-dbd8-44f7-b3f0-4d251148ade2" name="post:\placing-order:application\json:prwss-orders-papi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="32cbee4f-3728-4982-8908-dc478cc3b11e" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="prwss-orders-papi-test-suite-get:\order-details:prwss-orders-papi-configTest" doc:id="397d2e6a-7235-4b36-9ab5-ebf0dd9a18cd" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="9931607a-9030-439e-8142-b78536f978b0" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0ce586cd-52fc-4299-92a6-aac8e5d9069b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<flow-ref doc:name="Flow Reference" doc:id="cfc8967d-b037-4aa0-9a12-495a4d09c85f" name="mile-log:data-enrinchment-failure"/>
+			<flow-ref doc:name="Flow Reference" doc:id="03edf6b9-cf79-4848-a851-903ae86e084c" name="mile-log:failure-response-received"/>
+			<flow-ref doc:name="Flow Reference" doc:id="58a2a87c-0833-4c18-8a53-b1efe0bb4d2d" name="mile-log:filter-criteria-failed"/>
+			<flow-ref doc:name="Flow Reference" doc:id="ead7131c-d237-435a-9e5a-f4a497652d5d" name="mile-log:payload-logger"/>
+			<flow-ref doc:name="Flow Reference" doc:id="9604d66e-a9f5-498f-97c0-b5767d972dba" name="mile-log:success-response-sent"/>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="3ae8c715-c92b-44ce-8c95-96b85beffb9f">
+				<munit:payload value="#[output application/json&#10;---&#10;readUrl('classpath://orderid.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\order-details:prwss-orders-papi-config" doc:id="a4ce2dc3-d216-4fe4-a7a9-fc26befd1709" name="get:\order-details:prwss-orders-papi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="5a544967-73de-4645-9e20-f588e7a8fb88" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="prwss-orders-papi-test-suite-get:\health:prwss-orders-papi-configTest" doc:id="ac1ecd15-7390-456b-b365-625831c8bfef" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e0b58b0b-1264-46ba-a2da-d6e13f273e7c" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="2ccb3009-55c1-46ba-b4d1-234ee06d9694" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\health:prwss-orders-papi-config" doc:id="598d25d6-b217-44a6-8ab9-653521d01e3b" name="get:\health:prwss-orders-papi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="6445eab0-ec2f-418c-8b96-af9e67ce76ca" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -36,8 +36,12 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="mile-log:request-received" doc:id="3b0cb74f-9a91-4177-a72e-3f04feb49280" name="mile-log:request-received"/>
-		<http:request method="GET" doc:name="getting the customer info" doc:id="8b247c37-d7ce-47d9-964c-419c2b8681ff" path="/coiInfo" responseTimeout="1600000" config-ref="HTTP_Request_configuration">
-			<http:headers><![CDATA[#[correlationId: attributes.headers.correlationId]]]></http:headers>
+		<http:request method="GET" doc:name="getting the customer info" doc:id="8b247c37-d7ce-47d9-964c-419c2b8681ff" responseTimeout="1600000" config-ref="HTTP_Request_configuration" path="${coinfo.path}">
+			<http:headers><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 			<http:query-params><![CDATA[#[output application/java
 ---
 {
@@ -118,8 +122,12 @@ output application/json
 					</ee:variables>
 				</ee:transform>
 				<flow-ref doc:name="mile-log:request-sent" doc:id="1ef7f324-1fca-4510-8bb2-5cd3a4b17bbd" name="mile-log:request-sent"/>
-				<http:request method="POST" doc:name="inserting the new customer details" doc:id="a4e47aa9-0c81-4d40-9b7f-2880ce4eb1c3" path="/coiUploading" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
-					<http:headers ><![CDATA[#[correlationId: attributes.headers.correlationId]]]></http:headers>
+				<http:request method="POST" doc:name="inserting the new customer details" doc:id="a4e47aa9-0c81-4d40-9b7f-2880ce4eb1c3" responseTimeout="1800000" config-ref="HTTP_Request_configuration" path="${customerdata.path}">
+					<http:headers ><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 				</http:request>
 				<ee:transform doc:name="logger inputPayload" doc:id="1ceba06e-ce8b-4d18-9ab8-c610bd919719">
 					<ee:message>
@@ -192,8 +200,12 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="mile-log:request-received" doc:id="4394e1dd-6bda-48ff-bf23-bc45dab941af" name="mile-log:request-received"/>
-		<http:request method="GET" doc:name="getting the tables information" doc:id="23270862-3289-4dc6-b92b-2c08fae60c2d" path="/coiInfo" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
-			<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+		<http:request method="GET" doc:name="getting the tables information" doc:id="23270862-3289-4dc6-b92b-2c08fae60c2d" path="${coinfo.path}" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 			<http:query-params ><![CDATA[#[{
 	query: vars.customerId,
 	values: vars.originalPayload.CID[0]
@@ -259,9 +271,13 @@ output application/json
 					</ee:variables>
 				</ee:transform>
 				<flow-ref doc:name="mile-log:request-sent" doc:id="a9b4ee5f-58ab-4a17-a7d0-2f6ab42385f7" name="mile-log:request-sent"/>
-				<http:request method="POST" doc:name="inserting the orders details" doc:id="944fb76f-d3ea-4f22-8adc-9c435c6dd827" path="/coiUploading" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+				<http:request method="POST" doc:name="inserting the orders details" doc:id="944fb76f-d3ea-4f22-8adc-9c435c6dd827" path="${customerdata.path}" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
 					<http:body ><![CDATA[#[vars.ordersQuery]]]></http:body>
-					<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+					<http:headers ><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 				</http:request>
 				<ee:transform doc:name="logger inputPayload" doc:id="6085e128-976b-4e6f-8052-0cab2705d181">
 					<ee:message>
@@ -296,9 +312,13 @@ payload]]></ee:set-payload>
 						<ee:set-variable variableName="customerId" ><![CDATA[vars.originalPayload[0].CID]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<http:request method="GET" doc:name="getting the customerId details" doc:id="151797df-1fc3-4dcc-8d5e-c46581a830ce" path="/coiInfo" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+				<http:request method="GET" doc:name="getting the customerId details" doc:id="151797df-1fc3-4dcc-8d5e-c46581a830ce" path="${coinfo.path}" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
 					<http:body ><![CDATA[#[vars.originalPayload]]]></http:body>
-					<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+					<http:headers ><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 					<http:query-params ><![CDATA[#[{
 	query: vars.ordersInfoQuery,
 	values: vars.customerId
@@ -348,12 +368,16 @@ query: "insert into mulepoc.prowess_items (itemId, orderId, CID, itemName, quant
 values (:itemId,:orderId,:CID,:itemName,:quantity,:unitPrice);"]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<http:request method="POST" doc:name="inserting the items info" doc:id="ebf80640-c251-4636-9b77-2e89060deb2b" path="/itemsuploading" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+				<http:request method="POST" doc:name="inserting the items info" doc:id="ebf80640-c251-4636-9b77-2e89060deb2b" path="${itemsdata.path}" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
 					<http:body ><![CDATA[#[{
 	payload: vars.ordersResponse,
 	query: vars.itemsQuery.query
 }]]]></http:body>
-					<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+					<http:headers ><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 				</http:request>
 				<ee:transform doc:name="logger inputPayload" doc:id="a33468aa-da8f-4621-a022-bd6cd5343eb9">
 					<ee:message>
@@ -534,7 +558,7 @@ payload]]></ee:set-payload>
 			<ee:variables >
 				<ee:set-variable variableName="customerOrders" ><![CDATA["select po.CID as poCID,po.orderId,po.paymentMethod,po.orderCreatedOn,po.totalAmount,po.shippingCity,po.shippingCountry,po.shippingState,po.shippingStreet,po.shippingZipCode,pi.itemId,pi.itemName,pi.quantity,pi.unitPrice,pi.CID,pc.CID as pcCID,pc.CName from mulepoc.prowess_items pi, mulepoc.prowess_orders po,mulepoc.prowess_customers pc  where po.CID = :filterId and pi.CID = :filterId and pc.CID= :filterId;"]]></ee:set-variable>
 				<ee:set-variable variableName="orderId" ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 if(attributes.queryParams[0] != null) attributes.queryParams[0] else payload.orderId]]></ee:set-variable>
 				<ee:set-variable variableName="inputPayload" ><![CDATA[%dw 2.0
@@ -554,8 +578,12 @@ output application/json
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="mile-log:request-received" doc:id="54d602d0-f918-43dd-b3df-4a642f2ea5ca" name="mile-log:request-received"/>
-		<http:request method="GET" doc:name="getting the ordersId info" doc:id="0ce586cd-52fc-4299-92a6-aac8e5d9069b" path="/coiInfo" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
-			<http:headers ><![CDATA[#[correlationId: vars.correlationId]]]></http:headers>
+		<http:request method="GET" doc:name="getting the ordersId info" doc:id="0ce586cd-52fc-4299-92a6-aac8e5d9069b" path="${coinfo.path}" responseTimeout="1800000" config-ref="HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[{
+	correlationId: attributes.headers.correlationId,
+	client_id: Mule::p('secure::anypoint.clientid'),
+	client_secret: Mule::p('secure::anypoint.clientsecrt')
+}]]]></http:headers>
 			<http:query-params ><![CDATA[#[{
 	query: vars.customerOrders,
 	values: vars.orderId
